@@ -24001,7 +24001,7 @@
                    options: options.map((label) => ({
                        label,
                        type: 'function',
-                       apply: `${label}(`
+                       apply: `[[${label}]](`
                    }))
                };
            }
@@ -24088,6 +24088,70 @@
        });
    }
 
+   class TagWidget extends WidgetType {
+       constructor(content) {
+           super();
+           this.content = content;
+       }
+       toDOM() {
+           // Create the container
+           const container = document.createElement('div');
+           container.style.display = 'inline-flex';
+           container.style.alignItems = 'center';
+           // Create the tag span
+           const span = document.createElement('span');
+           span.className = 'tag-widget';
+           span.textContent = this.content;
+           span.style.backgroundColor = 'green';
+           span.style.color = 'white';
+           span.style.padding = '2px 4px';
+           span.style.marginRight = '5px';
+           span.style.borderRadius = '4px';
+           // Create the dropdown select element
+           const select = document.createElement('select');
+           ['a', 'b', 'c'].forEach((value) => {
+               const option = document.createElement('option');
+               option.value = value;
+               option.textContent = value;
+               select.appendChild(option);
+           });
+           // Append the span and the select to the container
+           container.appendChild(span);
+           container.appendChild(select);
+           return container;
+       }
+       ignoreEvent() {
+           return false;
+       }
+   }
+
+   /* eslint-disable */
+   function tagDecoration(doc) {
+       let decorations = [];
+       const range = doc.toString();
+       const regex = /\[\[(.+?)\]\]/g; // Updated regex
+       let match;
+       while ((match = regex.exec(range))) {
+           const start = match.index;
+           const end = start + match[0].length;
+           console.log(match[1]);
+           decorations.push(Decoration.replace({ widget: new TagWidget(match[1]) }).range(start, end));
+       }
+       return Decoration.set(decorations);
+   }
+   const tagExtension = StateField.define({
+       create(view) {
+           return tagDecoration(view.doc);
+       },
+       update(decorations, tr) {
+           if (tr.docChanged) {
+               return tagDecoration(tr.state.doc);
+           }
+           return decorations;
+       },
+       provide: field => EditorView.decorations.from(field)
+   });
+
    //3rd's
    const defaultIdiom = 'en-US', inptIdiom = document.getElementById('langComp'), inptSeparator = document.getElementById('separator'), inptIndent = document.getElementById('indent'), btnPrettier = document.getElementById('prettier'), languageCompart = new Compartment(), autocompleteCompart = new Compartment();
    /**
@@ -24110,11 +24174,12 @@
        EditorView.lineWrapping
    ];
    const editor = new EditorView({
-       doc: 'IF(SUM(IF(A1=A2,10,-1))=1, "Condition1", "Condition2")',
+       doc: 'IF(SUM(IF(A1=A2,10,-1))=1, "Condition1", "Condition2")[[var]]',
        extensions: [
            ...extensions,
            languageCompart.of(spreadsheet()),
-           autocompleteCompart.of([])
+           autocompleteCompart.of([]),
+           tagExtension
        ],
        parent: document.getElementById('editor')
    });

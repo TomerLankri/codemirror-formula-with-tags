@@ -36,8 +36,8 @@ export async function setAutocompletionIdiom(
         (label: string): Completion => ({
           label,
           type: 'function',
-          apply: `${label}(`
-        })
+          apply: `[[${label}]](`
+        }) //@dotun I added [[ ]] to the apply property on all autocompletes so we can see what happens here .
       )
     };
   }

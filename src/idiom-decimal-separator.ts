@@ -1,7 +1,4 @@
-import {
-  spreadsheet,
-  Toptions
-} from 'codemirror-lang-spreadsheet';
+import { spreadsheet, Toptions } from 'codemirror-lang-spreadsheet';
 import { EditorView } from '@codemirror/view';
 import { Compartment } from '@codemirror/state';
 

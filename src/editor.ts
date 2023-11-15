@@ -14,6 +14,7 @@ import {
 import { setAutocompletionIdiom } from './autocompletion';
 import { setEditorOptions } from './idiom-decimal-separator';
 import { codePrettier } from './prettier';
+import { tagExtension } from './OurCode/placeholders';
 
 const defaultIdiom = 'en-US',
   inptIdiom = document.getElementById('langComp') as HTMLSelectElement,
@@ -45,12 +46,13 @@ const extensions = [
 ];
 
 const editor = new EditorView({
-  doc: 'IF(SUM(IF(A1=A2,10,-1))=1, "Condition1", "Condition2")',
+  doc: 'IF(SUM(IF(A1=A2,10,-1))=1, "Condition1", "Condition2")[[var]]',
   extensions: [
     ...extensions,
     languageCompart.of(spreadsheet()),
-    autocompleteCompart.of([])
-  ],
+    autocompleteCompart.of([]),
+    tagExtension
+  ], //@dotun I added the tagExtension here so we can see what happens when we replace a tag with a widget
   parent: document.getElementById('editor') as HTMLDivElement
 });
 
